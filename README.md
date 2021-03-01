@@ -1,4 +1,4 @@
-# gitlab-auto-devops-example
+# go-openapi
 
 This project shows a basic Golang server with a Dockerfile.
 
