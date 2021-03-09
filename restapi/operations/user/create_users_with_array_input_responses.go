@@ -11,6 +11,30 @@ import (
 	"github.com/go-openapi/runtime"
 )
 
+// CreateUsersWithArrayInputBadRequestCode is the HTTP code returned for type CreateUsersWithArrayInputBadRequest
+const CreateUsersWithArrayInputBadRequestCode int = 400
+
+/*CreateUsersWithArrayInputBadRequest Error creating user
+
+swagger:response createUsersWithArrayInputBadRequest
+*/
+type CreateUsersWithArrayInputBadRequest struct {
+}
+
+// NewCreateUsersWithArrayInputBadRequest creates CreateUsersWithArrayInputBadRequest with default headers values
+func NewCreateUsersWithArrayInputBadRequest() *CreateUsersWithArrayInputBadRequest {
+
+	return &CreateUsersWithArrayInputBadRequest{}
+}
+
+// WriteResponse to the client
+func (o *CreateUsersWithArrayInputBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+
+	rw.WriteHeader(400)
+}
+
 /*CreateUsersWithArrayInputDefault successful operation
 
 swagger:response createUsersWithArrayInputDefault

@@ -122,3 +122,27 @@ func (o *LoginUserBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 
 	rw.WriteHeader(400)
 }
+
+// LoginUserInternalServerErrorCode is the HTTP code returned for type LoginUserInternalServerError
+const LoginUserInternalServerErrorCode int = 500
+
+/*LoginUserInternalServerError Error creating user
+
+swagger:response loginUserInternalServerError
+*/
+type LoginUserInternalServerError struct {
+}
+
+// NewLoginUserInternalServerError creates LoginUserInternalServerError with default headers values
+func NewLoginUserInternalServerError() *LoginUserInternalServerError {
+
+	return &LoginUserInternalServerError{}
+}
+
+// WriteResponse to the client
+func (o *LoginUserInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+
+	rw.WriteHeader(500)
+}
