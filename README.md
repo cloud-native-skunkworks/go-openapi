@@ -1,5 +1,6 @@
 # go-openapi ✨
 
+
 This project shows a basic Golang server with a Dockerfile.
 It uses go-swagger to generate the code from the swagger file which is cool. 😎
 
