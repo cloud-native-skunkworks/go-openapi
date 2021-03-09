@@ -11,6 +11,30 @@ import (
 	"github.com/go-openapi/runtime"
 )
 
+// CreateUserBadRequestCode is the HTTP code returned for type CreateUserBadRequest
+const CreateUserBadRequestCode int = 400
+
+/*CreateUserBadRequest Error creating user
+
+swagger:response createUserBadRequest
+*/
+type CreateUserBadRequest struct {
+}
+
+// NewCreateUserBadRequest creates CreateUserBadRequest with default headers values
+func NewCreateUserBadRequest() *CreateUserBadRequest {
+
+	return &CreateUserBadRequest{}
+}
+
+// WriteResponse to the client
+func (o *CreateUserBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+
+	rw.WriteHeader(400)
+}
+
 /*CreateUserDefault successful operation
 
 swagger:response createUserDefault
