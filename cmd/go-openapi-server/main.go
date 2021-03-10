@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/AlexsJones/go-openapi/models"
+	logadaptor "github.com/AlexsJones/go-openapi/pkg/log"
 	"github.com/AlexsJones/go-openapi/pkg/storage"
 	"github.com/AlexsJones/go-openapi/restapi"
 	"github.com/AlexsJones/go-openapi/restapi/operations"
@@ -10,21 +11,29 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/jessevdk/go-flags"
 	"github.com/opentracing/opentracing-go"
+	log "github.com/sirupsen/logrus"
 	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
-	jaegerlog "github.com/uber/jaeger-client-go/log"
 	"github.com/uber/jaeger-lib/metrics"
-	"log"
 	"os"
 )
 
 func main() {
-
 	// Fake database
 	db, err := storage.LoadLocalDB()
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Logging
+	cLogger := log.New()
+	cLoggerEntry := cLogger.WithFields(log.Fields{
+		"app": "go-opennapi",
+	})
+
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.InfoLevel)
+
 	// Configure Jaeger
 	cfg := jaegercfg.Configuration{
 		ServiceName: "go-openapi",
@@ -36,21 +45,19 @@ func main() {
 			LogSpans: true,
 		},
 	}
-	jLogger := jaegerlog.StdLogger
 	jMetricsFactory := metrics.NullFactory
 	tracer, closer, err := cfg.NewTracer(
-		jaegercfg.Logger(jLogger),
-		jaegercfg.Metrics(jMetricsFactory),
-	)
+		jaegercfg.Logger(logadaptor.LogrusAdapter{Logger: cLogger}),
+		jaegercfg.Metrics(jMetricsFactory))
 	if err != nil {
-		jLogger.Error(err.Error())
+		cLoggerEntry.Error(err.Error())
 	}
 	opentracing.SetGlobalTracer(tracer)
 	defer closer.Close()
 
 	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
 	if err != nil {
-		log.Fatalln(err)
+		cLoggerEntry.Fatalln(err)
 	}
 
 	api := operations.NewGoOpenapiAPI(swaggerSpec)
@@ -62,7 +69,7 @@ func main() {
 	for _, optsGroup := range api.CommandLineOptionsGroups {
 		_, err := parser.AddGroup(optsGroup.ShortDescription, optsGroup.LongDescription, optsGroup.Options)
 		if err != nil {
-			log.Fatalln(err)
+			cLoggerEntry.Fatalln(err)
 		}
 	}
 
@@ -78,6 +85,13 @@ func main() {
 
 	// Stub API code examples ------------------------------------------------------------------------------------------
 	api.UserCreateUserHandler = user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
+		cLoggerEntry.WithFields(log.Fields{
+			"username": params.Body.Username,
+			"headers": params.HTTPRequest.Header,
+			"method": params.HTTPRequest.Method,
+			"host": params.HTTPRequest.Host,
+			"requestPath": params.HTTPRequest.RequestURI,
+		}).Info("CreateUserHandlerFunc")
 		t := opentracing.GlobalTracer()
 		span := t.StartSpan("UserCreateUserHandler")
 		defer span.Finish()
@@ -88,12 +102,25 @@ func main() {
 		defer tnxSpan.Finish()
 		txn := db.Txn(true)
 		if err := txn.Insert("user",params.Body); err != nil {
-			log.Fatal(err)
+			cLoggerEntry.WithFields(log.Fields{
+				"username": params.Body.Username,
+				"headers": params.HTTPRequest.Header,
+				"method": params.HTTPRequest.Method,
+				"host": params.HTTPRequest.Host,
+				"requestPath": params.HTTPRequest.RequestURI,
+			}).Warn(err)
 		}
 		txn.Commit()
 		return user.NewCreateUserDefault(201)
 	})
 	api.UserGetUserByNameHandler = user.GetUserByNameHandlerFunc(func(params user.GetUserByNameParams) middleware.Responder {
+		cLoggerEntry.WithFields(log.Fields{
+			"username": params.Username,
+			"headers": params.HTTPRequest.Header,
+			"method": params.HTTPRequest.Method,
+			"host": params.HTTPRequest.Host,
+			"requestPath": params.HTTPRequest.RequestURI,
+		}).Infof("UserGetUserByNameHandler")
 		t := opentracing.GlobalTracer()
 		span := t.StartSpan("UserGetUserByNameHandler")
 		defer span.Finish()
@@ -105,7 +132,13 @@ func main() {
 		txn := db.Txn(true)
 		raw, err := txn.First("user", "username",params.Username)
 		if err != nil {
-			panic(err)
+			cLoggerEntry.WithFields(log.Fields{
+				"username": params.Username,
+				"headers": params.HTTPRequest.Header,
+				"method": params.HTTPRequest.Method,
+				"host": params.HTTPRequest.Host,
+				"requestPath": params.HTTPRequest.RequestURI,
+			}).Warn(err)
 		}
 		txn.Commit()
 		if raw == nil {
@@ -118,7 +151,7 @@ func main() {
 	server.ConfigureAPI()
 	server.Port = 8080
 	if err := server.Serve(); err != nil {
-		log.Fatalln(err)
+		cLoggerEntry.Fatalln(err)
 	}
 	// -----------------------------------------------------------------------------------------------------------------
 
