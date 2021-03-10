@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/AlexsJones/go-openapi/models"
 	logadaptor "github.com/AlexsJones/go-openapi/pkg/log"
 	"github.com/AlexsJones/go-openapi/pkg/storage"
@@ -15,7 +17,6 @@ import (
 	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-lib/metrics"
-	"os"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 	// Logging
 	cLogger := log.New()
 	cLoggerEntry := cLogger.WithFields(log.Fields{
-		"app": "go-opennapi",
+		"app": "go-openapi",
 	})
 	//  -----------------------------------------------------------------------------------------------------------------
 	// Jaeger
@@ -40,11 +41,11 @@ func main() {
 	// Configure Jaeger
 	cfg := jaegercfg.Configuration{
 		ServiceName: "go-openapi",
-		Sampler:     &jaegercfg.SamplerConfig{
+		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,
 		},
-		Reporter:    &jaegercfg.ReporterConfig{
+		Reporter: &jaegercfg.ReporterConfig{
 			LogSpans: true,
 		},
 	}
@@ -89,10 +90,10 @@ func main() {
 	// Stub API code examples ------------------------------------------------------------------------------------------
 	api.UserCreateUserHandler = user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
 		cLoggerEntry.WithFields(log.Fields{
-			"username": params.Body.Username,
-			"headers": params.HTTPRequest.Header,
-			"method": params.HTTPRequest.Method,
-			"host": params.HTTPRequest.Host,
+			"username":    params.Body.Username,
+			"headers":     params.HTTPRequest.Header,
+			"method":      params.HTTPRequest.Method,
+			"host":        params.HTTPRequest.Host,
 			"requestPath": params.HTTPRequest.RequestURI,
 		}).Info("CreateUserHandlerFunc")
 		t := opentracing.GlobalTracer()
@@ -104,12 +105,12 @@ func main() {
 		)
 		defer tnxSpan.Finish()
 		txn := db.Txn(true)
-		if err := txn.Insert("user",params.Body); err != nil {
+		if err := txn.Insert("user", params.Body); err != nil {
 			cLoggerEntry.WithFields(log.Fields{
-				"username": params.Body.Username,
-				"headers": params.HTTPRequest.Header,
-				"method": params.HTTPRequest.Method,
-				"host": params.HTTPRequest.Host,
+				"username":    params.Body.Username,
+				"headers":     params.HTTPRequest.Header,
+				"method":      params.HTTPRequest.Method,
+				"host":        params.HTTPRequest.Host,
 				"requestPath": params.HTTPRequest.RequestURI,
 			}).Warn(err)
 		}
@@ -118,10 +119,10 @@ func main() {
 	})
 	api.UserGetUserByNameHandler = user.GetUserByNameHandlerFunc(func(params user.GetUserByNameParams) middleware.Responder {
 		cLoggerEntry.WithFields(log.Fields{
-			"username": params.Username,
-			"headers": params.HTTPRequest.Header,
-			"method": params.HTTPRequest.Method,
-			"host": params.HTTPRequest.Host,
+			"username":    params.Username,
+			"headers":     params.HTTPRequest.Header,
+			"method":      params.HTTPRequest.Method,
+			"host":        params.HTTPRequest.Host,
 			"requestPath": params.HTTPRequest.RequestURI,
 		}).Infof("UserGetUserByNameHandler")
 		t := opentracing.GlobalTracer()
@@ -133,20 +134,20 @@ func main() {
 		)
 		defer tnxSpan.Finish()
 		txn := db.Txn(true)
-		raw, err := txn.First("user", "username",params.Username)
+		raw, err := txn.First("user", "username", params.Username)
 		if err != nil {
 			cLoggerEntry.WithFields(log.Fields{
-				"username": params.Username,
-				"headers": params.HTTPRequest.Header,
-				"method": params.HTTPRequest.Method,
-				"host": params.HTTPRequest.Host,
+				"username":    params.Username,
+				"headers":     params.HTTPRequest.Header,
+				"method":      params.HTTPRequest.Method,
+				"host":        params.HTTPRequest.Host,
 				"requestPath": params.HTTPRequest.RequestURI,
 			}).Warn(err)
 		}
 		txn.Commit()
 		if raw == nil {
 			return user.NewGetUserByNameNotFound()
- 		}
+		}
 		u := raw.(*models.User)
 		return user.NewGetUserByNameOK().WithPayload(u)
 	})
@@ -159,5 +160,3 @@ func main() {
 	// -----------------------------------------------------------------------------------------------------------------
 
 }
-
-
