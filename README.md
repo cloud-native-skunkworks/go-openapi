@@ -1,16 +1,17 @@
 # go-openapi ✨
 
+This project uses openapi to auto generate server code.
+It also demonstrates how to implement jaeger/prometheus and structured logging clients.
 
-This project shows a basic Golang server with a Dockerfile.
-It uses go-swagger to generate the code from the swagger file which is cool. 😎
-
-
-It can be consumed and automatically deployed to Kubernetes ( with generation of charts ) through gitlab.
+It can be consumed and automatically deployed to Kubernetes ( with generation of charts ).
 
 - OpenAPI
 - Kubernetes
 - Docker
 - Gitlab
+- Prometheus
+- Jaeger
+- Logging
 - go-memdb ( in memory db )
 - AutoDevops
 
@@ -34,7 +35,13 @@ go run cmd/go-openapi/main.go
 View the UI...
 
 ```
-http://127.0.0.1:58845/v2/docs
+http://127.0.0.1:8080/v2/docs
+```
+
+View metrics
+
+```
+http://127.0.0.1:8080/metrics
 ```
 
 ## Do something 🤷🏼‍♀️
