@@ -15,6 +15,7 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
+	github.com/prometheus/client_golang v1.9.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/uber/jaeger-client-go v2.25.0+incompatible
 	github.com/uber/jaeger-lib v2.4.0+incompatible // indirect
