@@ -1,9 +1,14 @@
 # go-openapi ✨
 
-This project uses openapi to auto generate server code.
-It also demonstrates how to implement jaeger/prometheus and structured logging clients.
+This project demonstrates how to implement logs, tracing and metrics.
+
+- Metrics are scrappable from /metrics.
+- Traces are configurable to be sent via jaeger environmental vars ( e.g. JAEGER_SERVICE_NAME )
+- Logs are structured and ready for a stdout appender sidecar.
 
 It can be consumed and automatically deployed to Kubernetes ( with generation of charts ).
+
+#### Key technologies ⚙️
 
 - OpenAPI
 - Kubernetes
