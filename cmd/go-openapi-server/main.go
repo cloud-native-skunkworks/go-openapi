@@ -29,14 +29,14 @@ func main() {
 	//  -----------------------------------------------------------------------------------------------------------------
 	// Logging
 	cLogger := log.New()
+	cLogger.SetFormatter(&log.JSONFormatter{})
+	cLogger.SetOutput(os.Stdout)
+	cLogger.SetLevel(log.InfoLevel)
 	cLoggerEntry := cLogger.WithFields(log.Fields{
 		"app": "go-openapi",
 	})
 	//  -----------------------------------------------------------------------------------------------------------------
 	// Jaeger
-	log.SetFormatter(&log.JSONFormatter{})
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.InfoLevel)
 
 	// Configure Jaeger
 	cfg := jaegercfg.Configuration{

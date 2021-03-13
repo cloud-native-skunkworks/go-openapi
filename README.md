@@ -57,6 +57,19 @@ http://127.0.0.1:8080/metrics
 curl -X GET "http://localhost:8080/v2/user/alex" -H  "accept: application/xml" -v
 ```
 
+#### Log output
+
+```
+{"app":"go-openapi","headers":{"Accept":["application/xml"],"Content-Length":["160"],"Content-Type":["application/json"],"Uber-Trace-Id":["0f7fcb90ad717acb:0f7fcb90ad717acb:0000000000000000:1"],"User-Agent":["curl/7.64.1"]},"host":"localhost:8080","level":"info","method":"POST","msg":"CreateUserHandlerFunc","requestPath":"/v2/user","time":"2021-03-13T21:22:12Z","username":"alex"}
+{"level":"info","msg":"Reporting span 0ebb18973152a625:6761e45df47fc84d:0ebb18973152a625:1","time":"2021-03-13T21:22:12Z"}
+{"level":"info","msg":"Reporting span 0ebb18973152a625:0ebb18973152a625:0000000000000000:1","time":"2021-03-13T21:22:12Z"}
+{"level":"info","msg":"Reporting span 0f7fcb90ad717acb:0f7fcb90ad717acb:0000000000000000:1","time":"2021-03-13T21:22:12Z"}
+{"app":"go-openapi","headers":{"Accept":["application/json"],"Uber-Trace-Id":["5e4a718c6705716f:5e4a718c6705716f:0000000000000000:1"],"User-Agent":["curl/7.64.1"]},"host":"localhost:8080","level":"info","method":"GET","msg":"UserGetUserByNameHandler","requestPath":"/v2/user/alex","time":"2021-03-13T21:22:18Z","username":"alex"}
+{"level":"info","msg":"Reporting span 04c676665241d9dd:5d1b7205328840e9:04c676665241d9dd:1","time":"2021-03-13T21:22:18Z"}
+{"level":"info","msg":"Reporting span 04c676665241d9dd:04c676665241d9dd:0000000000000000:1","time":"2021-03-13T21:22:18Z"}
+{"level":"info","msg":"Reporting span 5e4a718c6705716f:5e4a718c6705716f:0000000000000000:1","time":"2021-03-13T21:22:18Z"}
+```
+
 
 #### Run Jaeger 
 
