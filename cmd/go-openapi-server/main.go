@@ -100,7 +100,7 @@ func main() {
 		span := t.StartSpan("UserCreateUserHandler")
 		defer span.Finish()
 		tnxSpan := tracer.StartSpan(
-			"DatabaseTx",
+			"DatabaseCreate",
 			opentracing.ChildOf(span.Context()),
 		)
 		defer tnxSpan.Finish()
@@ -117,6 +117,53 @@ func main() {
 		txn.Commit()
 		return user.NewCreateUserDefault(201)
 	})
+
+	api.UserDeleteUserHandler = user.DeleteUserHandlerFunc(func(params user.DeleteUserParams) middleware.Responder {
+		cLoggerEntry.WithFields(log.Fields{
+			"username":    params.Username,
+			"headers":     params.HTTPRequest.Header,
+			"method":      params.HTTPRequest.Method,
+			"host":        params.HTTPRequest.Host,
+			"requestPath": params.HTTPRequest.RequestURI,
+		}).Infof("UserDeleteUserHandler")
+		t := opentracing.GlobalTracer()
+		span := t.StartSpan("UserDeleteUserHandler")
+		defer span.Finish()
+		tnxGetSpan := tracer.StartSpan(
+			"DatabaseGet",
+			opentracing.ChildOf(span.Context()),
+		)
+		defer tnxGetSpan.Finish()
+		txn := db.Txn(true)
+		raw, err := txn.First("user", "username", params.Username)
+		if err != nil {
+			cLoggerEntry.WithFields(log.Fields{
+				"username":    params.Username,
+				"headers":     params.HTTPRequest.Header,
+				"method":      params.HTTPRequest.Method,
+				"host":        params.HTTPRequest.Host,
+				"requestPath": params.HTTPRequest.RequestURI,
+			}).Warn(err)
+			return user.NewDeleteUserNotFound()
+		}
+		tnxDelSpan := tracer.StartSpan(
+			"DatabaseDelete",
+			opentracing.ChildOf(tnxGetSpan.Context()),
+		)
+		defer tnxDelSpan.Finish()
+		if err := txn.Delete("user", raw); err != nil {
+			cLoggerEntry.WithFields(log.Fields{
+				"username":    params.Username,
+				"headers":     params.HTTPRequest.Header,
+				"method":      params.HTTPRequest.Method,
+				"host":        params.HTTPRequest.Host,
+				"requestPath": params.HTTPRequest.RequestURI,
+			}).Warn(err)
+			return user.NewDeleteUserNotFound()
+		}
+		return user.NewDeleteUserOK()
+	})
+
 	api.UserGetUserByNameHandler = user.GetUserByNameHandlerFunc(func(params user.GetUserByNameParams) middleware.Responder {
 		cLoggerEntry.WithFields(log.Fields{
 			"username":    params.Username,
@@ -129,11 +176,11 @@ func main() {
 		span := t.StartSpan("UserGetUserByNameHandler")
 		defer span.Finish()
 		tnxSpan := tracer.StartSpan(
-			"DatabaseTx",
+			"DatabaseGet",
 			opentracing.ChildOf(span.Context()),
 		)
 		defer tnxSpan.Finish()
-		txn := db.Txn(true)
+		txn := db.Txn(false)
 		raw, err := txn.First("user", "username", params.Username)
 		if err != nil {
 			cLoggerEntry.WithFields(log.Fields{
@@ -144,7 +191,6 @@ func main() {
 				"requestPath": params.HTTPRequest.RequestURI,
 			}).Warn(err)
 		}
-		txn.Commit()
 		if raw == nil {
 			return user.NewGetUserByNameNotFound()
 		}

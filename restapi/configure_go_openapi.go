@@ -44,16 +44,6 @@ func configureAPI(api *operations.GoOpenapiAPI) http.Handler {
 			return middleware.NotImplemented("operation user.CreateUser has not yet been implemented")
 		})
 	}
-	if api.UserCreateUsersWithArrayInputHandler == nil {
-		api.UserCreateUsersWithArrayInputHandler = user.CreateUsersWithArrayInputHandlerFunc(func(params user.CreateUsersWithArrayInputParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.CreateUsersWithArrayInput has not yet been implemented")
-		})
-	}
-	if api.UserCreateUsersWithListInputHandler == nil {
-		api.UserCreateUsersWithListInputHandler = user.CreateUsersWithListInputHandlerFunc(func(params user.CreateUsersWithListInputParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.CreateUsersWithListInput has not yet been implemented")
-		})
-	}
 	if api.UserDeleteUserHandler == nil {
 		api.UserDeleteUserHandler = user.DeleteUserHandlerFunc(func(params user.DeleteUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation user.DeleteUser has not yet been implemented")

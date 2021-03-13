@@ -48,12 +48,6 @@ func NewGoOpenapiAPI(spec *loads.Document) *GoOpenapiAPI {
 		UserCreateUserHandler: user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation user.CreateUser has not yet been implemented")
 		}),
-		UserCreateUsersWithArrayInputHandler: user.CreateUsersWithArrayInputHandlerFunc(func(params user.CreateUsersWithArrayInputParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.CreateUsersWithArrayInput has not yet been implemented")
-		}),
-		UserCreateUsersWithListInputHandler: user.CreateUsersWithListInputHandlerFunc(func(params user.CreateUsersWithListInputParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.CreateUsersWithListInput has not yet been implemented")
-		}),
 		UserDeleteUserHandler: user.DeleteUserHandlerFunc(func(params user.DeleteUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation user.DeleteUser has not yet been implemented")
 		}),
@@ -110,10 +104,6 @@ type GoOpenapiAPI struct {
 
 	// UserCreateUserHandler sets the operation handler for the create user operation
 	UserCreateUserHandler user.CreateUserHandler
-	// UserCreateUsersWithArrayInputHandler sets the operation handler for the create users with array input operation
-	UserCreateUsersWithArrayInputHandler user.CreateUsersWithArrayInputHandler
-	// UserCreateUsersWithListInputHandler sets the operation handler for the create users with list input operation
-	UserCreateUsersWithListInputHandler user.CreateUsersWithListInputHandler
 	// UserDeleteUserHandler sets the operation handler for the delete user operation
 	UserDeleteUserHandler user.DeleteUserHandler
 	// UserGetUserByNameHandler sets the operation handler for the get user by name operation
@@ -206,12 +196,6 @@ func (o *GoOpenapiAPI) Validate() error {
 
 	if o.UserCreateUserHandler == nil {
 		unregistered = append(unregistered, "user.CreateUserHandler")
-	}
-	if o.UserCreateUsersWithArrayInputHandler == nil {
-		unregistered = append(unregistered, "user.CreateUsersWithArrayInputHandler")
-	}
-	if o.UserCreateUsersWithListInputHandler == nil {
-		unregistered = append(unregistered, "user.CreateUsersWithListInputHandler")
 	}
 	if o.UserDeleteUserHandler == nil {
 		unregistered = append(unregistered, "user.DeleteUserHandler")
@@ -322,14 +306,6 @@ func (o *GoOpenapiAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/user"] = user.NewCreateUser(o.context, o.UserCreateUserHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/user/createWithArray"] = user.NewCreateUsersWithArrayInput(o.context, o.UserCreateUsersWithArrayInputHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/user/createWithList"] = user.NewCreateUsersWithListInput(o.context, o.UserCreateUsersWithListInputHandler)
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}

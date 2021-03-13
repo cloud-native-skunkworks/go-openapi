@@ -35,54 +35,6 @@ paths:
           description: "successful operation"
         400:
           description: "Error creating user"
-  /user/createWithArray:
-    post:
-      tags:
-        - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithArrayInput"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "List of user object"
-          required: true
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/User"
-      responses:
-        default:
-          description: "successful operation"
-        400:
-          description: "Error creating user"
-  /user/createWithList:
-    post:
-      tags:
-        - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithListInput"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "List of user object"
-          required: true
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/User"
-      responses:
-        default:
-          description: "successful operation"
-        400:
-          description: "Error creating user"
   /user/login:
     get:
       tags:
@@ -207,6 +159,8 @@ paths:
           description: "Invalid username supplied"
         "404":
           description: "User not found"
+        "200":
+          description: "User deleted"
 securityDefinitions:
   user_auth:
     type: "oauth2"

@@ -62,76 +62,6 @@ func init() {
         }
       }
     },
-    "/user/createWithArray": {
-      "post": {
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Creates list of users with given input array",
-        "operationId": "createUsersWithArrayInput",
-        "parameters": [
-          {
-            "description": "List of user object",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Error creating user"
-          },
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-    "/user/createWithList": {
-      "post": {
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Creates list of users with given input array",
-        "operationId": "createUsersWithListInput",
-        "parameters": [
-          {
-            "description": "List of user object",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Error creating user"
-          },
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
     "/user/login": {
       "get": {
         "produces": [
@@ -299,6 +229,9 @@ func init() {
           }
         ],
         "responses": {
+          "200": {
+            "description": "User deleted"
+          },
           "400": {
             "description": "Invalid username supplied"
           },
@@ -437,76 +370,6 @@ func init() {
         }
       }
     },
-    "/user/createWithArray": {
-      "post": {
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Creates list of users with given input array",
-        "operationId": "createUsersWithArrayInput",
-        "parameters": [
-          {
-            "description": "List of user object",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Error creating user"
-          },
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-    "/user/createWithList": {
-      "post": {
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Creates list of users with given input array",
-        "operationId": "createUsersWithListInput",
-        "parameters": [
-          {
-            "description": "List of user object",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Error creating user"
-          },
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
     "/user/login": {
       "get": {
         "produces": [
@@ -674,6 +537,9 @@ func init() {
           }
         ],
         "responses": {
+          "200": {
+            "description": "User deleted"
+          },
           "400": {
             "description": "Invalid username supplied"
           },

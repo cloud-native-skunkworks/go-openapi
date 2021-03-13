@@ -11,6 +11,30 @@ import (
 	"github.com/go-openapi/runtime"
 )
 
+// DeleteUserOKCode is the HTTP code returned for type DeleteUserOK
+const DeleteUserOKCode int = 200
+
+/*DeleteUserOK User deleted
+
+swagger:response deleteUserOK
+*/
+type DeleteUserOK struct {
+}
+
+// NewDeleteUserOK creates DeleteUserOK with default headers values
+func NewDeleteUserOK() *DeleteUserOK {
+
+	return &DeleteUserOK{}
+}
+
+// WriteResponse to the client
+func (o *DeleteUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+
+	rw.WriteHeader(200)
+}
+
 // DeleteUserBadRequestCode is the HTTP code returned for type DeleteUserBadRequest
 const DeleteUserBadRequestCode int = 400
 
