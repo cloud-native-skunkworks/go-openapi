@@ -56,6 +56,9 @@ func init() {
           "400": {
             "description": "Error creating user"
           },
+          "409": {
+            "description": "User exists"
+          },
           "default": {
             "description": "successful operation"
           }
@@ -363,6 +366,9 @@ func init() {
         "responses": {
           "400": {
             "description": "Error creating user"
+          },
+          "409": {
+            "description": "User exists"
           },
           "default": {
             "description": "successful operation"

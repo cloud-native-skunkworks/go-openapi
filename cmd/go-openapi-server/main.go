@@ -99,12 +99,32 @@ func main() {
 		t := opentracing.GlobalTracer()
 		span := t.StartSpan("UserCreateUserHandler")
 		defer span.Finish()
-		tnxSpan := tracer.StartSpan(
-			"DatabaseCreate",
+
+		tnxGetSpan := tracer.StartSpan(
+			"DatabaseGet",
 			opentracing.ChildOf(span.Context()),
 		)
-		defer tnxSpan.Finish()
+		defer tnxGetSpan.Finish()
+		getTxn := db.Txn(false)
+		defer getTxn.Abort()
+		raw, err := getTxn.First("user", "username", params.Body.Username)
+		if err != nil || raw != nil {
+			cLoggerEntry.WithFields(log.Fields{
+				"username":    params.Body.Username,
+				"headers":     params.HTTPRequest.Header,
+				"method":      params.HTTPRequest.Method,
+				"host":        params.HTTPRequest.Host,
+				"requestPath": params.HTTPRequest.RequestURI,
+			}).Warn(err)
+			return user.NewCreateUserConflict()
+		}
+		tnxCreateSpan := tracer.StartSpan(
+			"DatabaseCreate",
+			opentracing.ChildOf(tnxGetSpan.Context()),
+		)
+		defer tnxCreateSpan.Finish()
 		txn := db.Txn(true)
+		defer txn.Abort()
 		if err := txn.Insert("user", params.Body); err != nil {
 			cLoggerEntry.WithFields(log.Fields{
 				"username":    params.Body.Username,
@@ -134,9 +154,10 @@ func main() {
 			opentracing.ChildOf(span.Context()),
 		)
 		defer tnxGetSpan.Finish()
-		txn := db.Txn(true)
-		raw, err := txn.First("user", "username", params.Username)
-		if err != nil {
+		getTxn := db.Txn(false)
+		defer getTxn.Abort()
+		raw, err := getTxn.First("user", "username", params.Username)
+		if err != nil || raw == nil {
 			cLoggerEntry.WithFields(log.Fields{
 				"username":    params.Username,
 				"headers":     params.HTTPRequest.Header,
@@ -151,7 +172,9 @@ func main() {
 			opentracing.ChildOf(tnxGetSpan.Context()),
 		)
 		defer tnxDelSpan.Finish()
-		if err := txn.Delete("user", raw); err != nil {
+		writeTxn := db.Txn(true)
+		defer writeTxn.Abort()
+		if err := writeTxn.Delete("user", raw); err != nil {
 			cLoggerEntry.WithFields(log.Fields{
 				"username":    params.Username,
 				"headers":     params.HTTPRequest.Header,
@@ -161,6 +184,8 @@ func main() {
 			}).Warn(err)
 			return user.NewDeleteUserNotFound()
 		}
+		writeTxn.Commit()
+
 		return user.NewDeleteUserOK()
 	})
 
@@ -181,6 +206,7 @@ func main() {
 		)
 		defer tnxSpan.Finish()
 		txn := db.Txn(false)
+		defer txn.Abort()
 		raw, err := txn.First("user", "username", params.Username)
 		if err != nil {
 			cLoggerEntry.WithFields(log.Fields{

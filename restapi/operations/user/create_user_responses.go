@@ -35,6 +35,30 @@ func (o *CreateUserBadRequest) WriteResponse(rw http.ResponseWriter, producer ru
 	rw.WriteHeader(400)
 }
 
+// CreateUserConflictCode is the HTTP code returned for type CreateUserConflict
+const CreateUserConflictCode int = 409
+
+/*CreateUserConflict User exists
+
+swagger:response createUserConflict
+*/
+type CreateUserConflict struct {
+}
+
+// NewCreateUserConflict creates CreateUserConflict with default headers values
+func NewCreateUserConflict() *CreateUserConflict {
+
+	return &CreateUserConflict{}
+}
+
+// WriteResponse to the client
+func (o *CreateUserConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+
+	rw.WriteHeader(409)
+}
+
 /*CreateUserDefault successful operation
 
 swagger:response createUserDefault

@@ -35,6 +35,8 @@ paths:
           description: "successful operation"
         400:
           description: "Error creating user"
+        409:
+          description: "User exists"
   /user/login:
     get:
       tags:
