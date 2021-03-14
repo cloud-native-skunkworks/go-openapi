@@ -99,7 +99,6 @@ func main() {
 		t := opentracing.GlobalTracer()
 		span := t.StartSpan("UserCreateUserHandler")
 		defer span.Finish()
-
 		tnxGetSpan := tracer.StartSpan(
 			"DatabaseGet",
 			opentracing.ChildOf(span.Context()),
