@@ -13,6 +13,14 @@ tags:
 schemes:
   - "http"
 paths:
+  /healthz:
+    get:
+      tags:
+        - "health"
+      summary: "Health check"
+      responses:
+        default:
+          description: "OK"
   /user:
     post:
       tags:

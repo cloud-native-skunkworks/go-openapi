@@ -29,6 +29,19 @@ func init() {
   },
   "basePath": "/v2",
   "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health check",
+        "responses": {
+          "default": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/user": {
       "post": {
         "description": "This can only be done by the logged in user.",
@@ -340,6 +353,19 @@ func init() {
   },
   "basePath": "/v2",
   "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health check",
+        "responses": {
+          "default": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/user": {
       "post": {
         "description": "This can only be done by the logged in user.",

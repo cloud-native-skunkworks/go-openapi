@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"github.com/AlexsJones/go-openapi/restapi/operations/health"
 	"github.com/AlexsJones/go-openapi/restapi/operations/user"
 )
 
@@ -45,6 +46,9 @@ func NewGoOpenapiAPI(spec *loads.Document) *GoOpenapiAPI {
 		JSONProducer: runtime.JSONProducer(),
 		XMLProducer:  runtime.XMLProducer(),
 
+		HealthGetHealthzHandler: health.GetHealthzHandlerFunc(func(params health.GetHealthzParams) middleware.Responder {
+			return middleware.NotImplemented("operation health.GetHealthz has not yet been implemented")
+		}),
 		UserCreateUserHandler: user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation user.CreateUser has not yet been implemented")
 		}),
@@ -102,6 +106,8 @@ type GoOpenapiAPI struct {
 	//   - application/xml
 	XMLProducer runtime.Producer
 
+	// HealthGetHealthzHandler sets the operation handler for the get healthz operation
+	HealthGetHealthzHandler health.GetHealthzHandler
 	// UserCreateUserHandler sets the operation handler for the create user operation
 	UserCreateUserHandler user.CreateUserHandler
 	// UserDeleteUserHandler sets the operation handler for the delete user operation
@@ -194,6 +200,9 @@ func (o *GoOpenapiAPI) Validate() error {
 		unregistered = append(unregistered, "XMLProducer")
 	}
 
+	if o.HealthGetHealthzHandler == nil {
+		unregistered = append(unregistered, "health.GetHealthzHandler")
+	}
 	if o.UserCreateUserHandler == nil {
 		unregistered = append(unregistered, "user.CreateUserHandler")
 	}
@@ -302,6 +311,10 @@ func (o *GoOpenapiAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/healthz"] = health.NewGetHealthz(o.context, o.HealthGetHealthzHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

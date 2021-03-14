@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/AlexsJones/go-openapi/restapi/operations/health"
 	"os"
 
 	"github.com/AlexsJones/go-openapi/models"
@@ -88,6 +89,11 @@ func main() {
 	}
 
 	// Stub API code examples ------------------------------------------------------------------------------------------
+	api.HealthGetHealthzHandler = health.GetHealthzHandlerFunc(func(params health.GetHealthzParams) middleware.Responder {
+		// Default health check
+		return health.NewGetHealthzDefault(200)
+	})
+
 	api.UserCreateUserHandler = user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
 		cLoggerEntry.WithFields(log.Fields{
 			"username":    params.Body.Username,
@@ -225,6 +231,7 @@ func main() {
 	// -----------------------------------------------------------------------------------------------------------------
 	server.ConfigureAPI()
 	server.Port = 8080
+	server.Host = "0.0.0.0"
 	if err := server.Serve(); err != nil {
 		cLoggerEntry.Fatalln(err)
 	}
