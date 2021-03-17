@@ -15,7 +15,7 @@ on:
 
 env:
   # TODO: Change variable to your image's name.
-  IMAGE_NAME: go-openapi:latest
+  IMAGE_NAME: go-openapi
 
 jobs:
   # Run tests.
