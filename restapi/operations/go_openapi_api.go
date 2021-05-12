@@ -19,8 +19,8 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/AlexsJones/go-openapi/restapi/operations/health"
-	"github.com/AlexsJones/go-openapi/restapi/operations/user"
+	"go-openapi/restapi/operations/health"
+	"go-openapi/restapi/operations/user"
 )
 
 // NewGoOpenapiAPI creates a new GoOpenapi instance

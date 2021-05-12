@@ -1,15 +1,14 @@
 package main
 
 import (
-	"github.com/AlexsJones/go-openapi/restapi/operations/health"
+	"go-openapi/restapi/operations/health"
 	"os"
-
-	"github.com/AlexsJones/go-openapi/models"
-	logadaptor "github.com/AlexsJones/go-openapi/pkg/log"
-	"github.com/AlexsJones/go-openapi/pkg/storage"
-	"github.com/AlexsJones/go-openapi/restapi"
-	"github.com/AlexsJones/go-openapi/restapi/operations"
-	"github.com/AlexsJones/go-openapi/restapi/operations/user"
+	"go-openapi/models"
+	logadaptor "go-openapi/pkg/log"
+	"go-openapi/pkg/storage"
+	"go-openapi/restapi"
+	"go-openapi/restapi/operations"
+	"go-openapi/restapi/operations/user"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/jessevdk/go-flags"

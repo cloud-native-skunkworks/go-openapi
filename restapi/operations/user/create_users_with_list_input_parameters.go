@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/AlexsJones/go-openapi/models"
+	"go-openapi/models"
 )
 
 // NewCreateUsersWithListInputParams creates a new CreateUsersWithListInputParams object

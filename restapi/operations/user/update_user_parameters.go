@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 
-	"github.com/AlexsJones/go-openapi/models"
+	"go-openapi/models"
 )
 
 // NewUpdateUserParams creates a new UpdateUserParams object

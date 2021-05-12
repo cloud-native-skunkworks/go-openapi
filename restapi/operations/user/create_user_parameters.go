@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
 
-	"github.com/AlexsJones/go-openapi/models"
+	"go-openapi/models"
 )
 
 // NewCreateUserParams creates a new CreateUserParams object

@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/AlexsJones/go-openapi/models"
+	"go-openapi/models"
 )
 
 // GetUserByNameOKCode is the HTTP code returned for type GetUserByNameOK

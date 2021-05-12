@@ -9,9 +9,9 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
-	customMiddleware "github.com/AlexsJones/go-openapi/middleware"
-	"github.com/AlexsJones/go-openapi/restapi/operations"
-	"github.com/AlexsJones/go-openapi/restapi/operations/user"
+	customMiddleware "go-openapi/middleware"
+	"go-openapi/restapi/operations"
+	"go-openapi/restapi/operations/user"
 )
 
 //go:generate swagger generate server --target ../../go-openapi --name GoOpenapi --spec ../static/swagger.yaml --principal interface{} --exclude-main

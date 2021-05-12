@@ -1,4 +1,4 @@
-module github.com/AlexsJones/go-openapi
+module go-openapi
 
 go 1.15
 

@@ -3,8 +3,8 @@ package restapi
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/AlexsJones/go-openapi/models"
-	"github.com/AlexsJones/go-openapi/restapi/operations"
+	"go-openapi/models"
+	"go-openapi/restapi/operations"
 	"github.com/go-openapi/loads"
 	"log"
 	"net/http"
