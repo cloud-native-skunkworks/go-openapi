@@ -11,15 +11,15 @@ import (
 	golangswaggerpaths "path"
 )
 
-// CreateUserURL generates an URL for the create user operation
-type CreateUserURL struct {
+// GetCartURL generates an URL for the get cart operation
+type GetCartURL struct {
 	_basePath string
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *CreateUserURL) WithBasePath(bp string) *CreateUserURL {
+func (o *GetCartURL) WithBasePath(bp string) *GetCartURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -27,15 +27,15 @@ func (o *CreateUserURL) WithBasePath(bp string) *CreateUserURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *CreateUserURL) SetBasePath(bp string) {
+func (o *GetCartURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *CreateUserURL) Build() (*url.URL, error) {
+func (o *GetCartURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/user"
+	var _path = "/user/cart"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -47,7 +47,7 @@ func (o *CreateUserURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *CreateUserURL) Must(u *url.URL, err error) *url.URL {
+func (o *GetCartURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -58,17 +58,17 @@ func (o *CreateUserURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *CreateUserURL) String() string {
+func (o *GetCartURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *CreateUserURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *GetCartURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on CreateUserURL")
+		return nil, errors.New("scheme is required for a full url on GetCartURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on CreateUserURL")
+		return nil, errors.New("host is required for a full url on GetCartURL")
 	}
 
 	base, err := o.Build()
@@ -82,6 +82,6 @@ func (o *CreateUserURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *CreateUserURL) StringFull(scheme, host string) string {
+func (o *GetCartURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

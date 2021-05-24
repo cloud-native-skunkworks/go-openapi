@@ -9,6 +9,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+
 	customMiddleware "go-openapi/middleware"
 	"go-openapi/restapi/operations"
 	"go-openapi/restapi/operations/user"
@@ -35,38 +36,30 @@ func configureAPI(api *operations.GoOpenapiAPI) http.Handler {
 	// api.UseRedoc()
 
 	api.JSONConsumer = runtime.JSONConsumer()
-	api.JSONProducer = runtime.JSONProducer()
-	api.XMLProducer = runtime.XMLProducer()
 
-	// Applies when the "api_key" header is set
-	if api.UserCreateUserHandler == nil {
-		api.UserCreateUserHandler = user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.CreateUser has not yet been implemented")
+	api.JSONProducer = runtime.JSONProducer()
+
+	// Applies when the "Authorization" header is set
+	if api.BearerAuth == nil {
+		api.BearerAuth = func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (Bearer) Authorization from header param [Authorization] has not yet been implemented")
+		}
+	}
+
+	// Set your custom authorizer if needed. Default one is security.Authorized()
+	// Expected interface runtime.Authorizer
+	//
+	// Example:
+	// api.APIAuthorizer = security.Authorized()
+
+	if api.UserGetCartHandler == nil {
+		api.UserGetCartHandler = user.GetCartHandlerFunc(func(params user.GetCartParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation user.GetCart has not yet been implemented")
 		})
 	}
-	if api.UserDeleteUserHandler == nil {
-		api.UserDeleteUserHandler = user.DeleteUserHandlerFunc(func(params user.DeleteUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.DeleteUser has not yet been implemented")
-		})
-	}
-	if api.UserGetUserByNameHandler == nil {
-		api.UserGetUserByNameHandler = user.GetUserByNameHandlerFunc(func(params user.GetUserByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.GetUserByName has not yet been implemented")
-		})
-	}
-	if api.UserLoginUserHandler == nil {
-		api.UserLoginUserHandler = user.LoginUserHandlerFunc(func(params user.LoginUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.LoginUser has not yet been implemented")
-		})
-	}
-	if api.UserLogoutUserHandler == nil {
-		api.UserLogoutUserHandler = user.LogoutUserHandlerFunc(func(params user.LogoutUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.LogoutUser has not yet been implemented")
-		})
-	}
-	if api.UserUpdateUserHandler == nil {
-		api.UserUpdateUserHandler = user.UpdateUserHandlerFunc(func(params user.UpdateUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UpdateUser has not yet been implemented")
+	if api.UserLoginHandler == nil {
+		api.UserLoginHandler = user.LoginHandlerFunc(func(params user.LoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.Login has not yet been implemented")
 		})
 	}
 
@@ -95,6 +88,8 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 	return handler
 }
 
+// The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
+// So this is a good place to plug in a panic handling middleware, logging and metrics.
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
 // So this is a good place to plug in a panic handling middleware, logging and metrics.
 func setupGlobalMiddleware(handler http.Handler) http.Handler {

@@ -19,7 +19,6 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"go-openapi/restapi/operations/health"
 	"go-openapi/restapi/operations/user"
 )
 
@@ -44,29 +43,20 @@ func NewGoOpenapiAPI(spec *loads.Document) *GoOpenapiAPI {
 		JSONConsumer: runtime.JSONConsumer(),
 
 		JSONProducer: runtime.JSONProducer(),
-		XMLProducer:  runtime.XMLProducer(),
 
-		HealthGetHealthzHandler: health.GetHealthzHandlerFunc(func(params health.GetHealthzParams) middleware.Responder {
-			return middleware.NotImplemented("operation health.GetHealthz has not yet been implemented")
+		UserGetCartHandler: user.GetCartHandlerFunc(func(params user.GetCartParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation user.GetCart has not yet been implemented")
 		}),
-		UserCreateUserHandler: user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.CreateUser has not yet been implemented")
+		UserLoginHandler: user.LoginHandlerFunc(func(params user.LoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation user.Login has not yet been implemented")
 		}),
-		UserDeleteUserHandler: user.DeleteUserHandlerFunc(func(params user.DeleteUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.DeleteUser has not yet been implemented")
-		}),
-		UserGetUserByNameHandler: user.GetUserByNameHandlerFunc(func(params user.GetUserByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.GetUserByName has not yet been implemented")
-		}),
-		UserLoginUserHandler: user.LoginUserHandlerFunc(func(params user.LoginUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.LoginUser has not yet been implemented")
-		}),
-		UserLogoutUserHandler: user.LogoutUserHandlerFunc(func(params user.LogoutUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.LogoutUser has not yet been implemented")
-		}),
-		UserUpdateUserHandler: user.UpdateUserHandlerFunc(func(params user.UpdateUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user.UpdateUser has not yet been implemented")
-		}),
+
+		// Applies when the "Authorization" header is set
+		BearerAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (Bearer) Authorization from header param [Authorization] has not yet been implemented")
+		},
+		// default authorizer is authorized meaning no requests are blocked
+		APIAuthorizer: security.Authorized(),
 	}
 }
 
@@ -102,24 +92,18 @@ type GoOpenapiAPI struct {
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/json
 	JSONProducer runtime.Producer
-	// XMLProducer registers a producer for the following mime types:
-	//   - application/xml
-	XMLProducer runtime.Producer
 
-	// HealthGetHealthzHandler sets the operation handler for the get healthz operation
-	HealthGetHealthzHandler health.GetHealthzHandler
-	// UserCreateUserHandler sets the operation handler for the create user operation
-	UserCreateUserHandler user.CreateUserHandler
-	// UserDeleteUserHandler sets the operation handler for the delete user operation
-	UserDeleteUserHandler user.DeleteUserHandler
-	// UserGetUserByNameHandler sets the operation handler for the get user by name operation
-	UserGetUserByNameHandler user.GetUserByNameHandler
-	// UserLoginUserHandler sets the operation handler for the login user operation
-	UserLoginUserHandler user.LoginUserHandler
-	// UserLogoutUserHandler sets the operation handler for the logout user operation
-	UserLogoutUserHandler user.LogoutUserHandler
-	// UserUpdateUserHandler sets the operation handler for the update user operation
-	UserUpdateUserHandler user.UpdateUserHandler
+	// BearerAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Authorization provided in the header
+	BearerAuth func(string) (interface{}, error)
+
+	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
+	APIAuthorizer runtime.Authorizer
+
+	// UserGetCartHandler sets the operation handler for the get cart operation
+	UserGetCartHandler user.GetCartHandler
+	// UserLoginHandler sets the operation handler for the login operation
+	UserLoginHandler user.LoginHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -196,30 +180,16 @@ func (o *GoOpenapiAPI) Validate() error {
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
 	}
-	if o.XMLProducer == nil {
-		unregistered = append(unregistered, "XMLProducer")
+
+	if o.BearerAuth == nil {
+		unregistered = append(unregistered, "AuthorizationAuth")
 	}
 
-	if o.HealthGetHealthzHandler == nil {
-		unregistered = append(unregistered, "health.GetHealthzHandler")
+	if o.UserGetCartHandler == nil {
+		unregistered = append(unregistered, "user.GetCartHandler")
 	}
-	if o.UserCreateUserHandler == nil {
-		unregistered = append(unregistered, "user.CreateUserHandler")
-	}
-	if o.UserDeleteUserHandler == nil {
-		unregistered = append(unregistered, "user.DeleteUserHandler")
-	}
-	if o.UserGetUserByNameHandler == nil {
-		unregistered = append(unregistered, "user.GetUserByNameHandler")
-	}
-	if o.UserLoginUserHandler == nil {
-		unregistered = append(unregistered, "user.LoginUserHandler")
-	}
-	if o.UserLogoutUserHandler == nil {
-		unregistered = append(unregistered, "user.LogoutUserHandler")
-	}
-	if o.UserUpdateUserHandler == nil {
-		unregistered = append(unregistered, "user.UpdateUserHandler")
+	if o.UserLoginHandler == nil {
+		unregistered = append(unregistered, "user.LoginHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -236,12 +206,21 @@ func (o *GoOpenapiAPI) ServeErrorFor(operationID string) func(http.ResponseWrite
 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *GoOpenapiAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name := range schemes {
+		switch name {
+		case "Bearer":
+			scheme := schemes[name]
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.BearerAuth)
+
+		}
+	}
+	return result
 }
 
 // Authorizer returns the registered authorizer
 func (o *GoOpenapiAPI) Authorizer() runtime.Authorizer {
-	return nil
+	return o.APIAuthorizer
 }
 
 // ConsumersFor gets the consumers for the specified media types.
@@ -269,8 +248,6 @@ func (o *GoOpenapiAPI) ProducersFor(mediaTypes []string) map[string]runtime.Prod
 		switch mt {
 		case "application/json":
 			result["application/json"] = o.JSONProducer
-		case "application/xml":
-			result["application/xml"] = o.XMLProducer
 		}
 
 		if p, ok := o.customProducers[mt]; ok {
@@ -314,31 +291,11 @@ func (o *GoOpenapiAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/healthz"] = health.NewGetHealthz(o.context, o.HealthGetHealthzHandler)
+	o.handlers["GET"]["/user/cart"] = user.NewGetCart(o.context, o.UserGetCartHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/user"] = user.NewCreateUser(o.context, o.UserCreateUserHandler)
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/user/{username}"] = user.NewDeleteUser(o.context, o.UserDeleteUserHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/user/{username}"] = user.NewGetUserByName(o.context, o.UserGetUserByNameHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/user/login"] = user.NewLoginUser(o.context, o.UserLoginUserHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/user/logout"] = user.NewLogoutUser(o.context, o.UserLogoutUserHandler)
-	if o.handlers["PUT"] == nil {
-		o.handlers["PUT"] = make(map[string]http.Handler)
-	}
-	o.handlers["PUT"]["/user/{username}"] = user.NewUpdateUser(o.context, o.UserUpdateUserHandler)
+	o.handlers["POST"]["/login"] = user.NewLogin(o.context, o.UserLoginHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

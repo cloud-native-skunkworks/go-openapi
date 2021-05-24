@@ -1,14 +1,7 @@
 package main
 
 import (
-	"go-openapi/restapi/operations/health"
-	"os"
-	"go-openapi/models"
-	logadaptor "go-openapi/pkg/log"
-	"go-openapi/pkg/storage"
-	"go-openapi/restapi"
-	"go-openapi/restapi/operations"
-	"go-openapi/restapi/operations/user"
+	"errors"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/jessevdk/go-flags"
@@ -17,15 +10,22 @@ import (
 	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-lib/metrics"
+	"go-openapi/models"
+	logadaptor "go-openapi/pkg/log"
+	"go-openapi/restapi"
+	"go-openapi/restapi/operations"
+	"go-openapi/restapi/operations/user"
+	"os"
+	"strings"
 )
 
 func main() {
 	// -----------------------------------------------------------------------------------------------------------------
 	// Fake database
-	db, err := storage.LoadLocalDB()
-	if err != nil {
-		log.Fatal(err)
-	}
+	//db, err := storage.LoadLocalDB()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 	//  -----------------------------------------------------------------------------------------------------------------
 	// Logging
 	cLogger := log.New()
@@ -87,146 +87,41 @@ func main() {
 		os.Exit(code)
 	}
 
+	// Example token ---------------------------------------------------------------------------------------------------
+	exampleToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+	exampleEmail := "foo@bar.com"
+	examplePass := "bar"
+
+
+
 	// Stub API code examples ------------------------------------------------------------------------------------------
-	api.HealthGetHealthzHandler = health.GetHealthzHandlerFunc(func(params health.GetHealthzParams) middleware.Responder {
-		// Default health check
-		return health.NewGetHealthzDefault(200)
+	api.BearerAuth = func(bearerHeader string) (interface{}, error) {
+		bearerToken := strings.Split(bearerHeader, " ")[1]
+
+		if bearerToken == exampleToken {
+			return true, nil
+		}
+
+		return nil, errors.New("invalid token")
+	}
+	api.UserLoginHandler = user.LoginHandlerFunc(func(params user.LoginParams) middleware.Responder {
+
+		if *params.Login.Email != exampleEmail && (*params.Login.Password) != examplePass {
+			return user.NewLoginNotFound()
+		}
+		return user.NewLoginOK().WithPayload(&models.LoginSuccess{
+			Success: true,
+			Token: exampleToken,
+		})
 	})
 
-	api.UserCreateUserHandler = user.CreateUserHandlerFunc(func(params user.CreateUserParams) middleware.Responder {
-		cLoggerEntry.WithFields(log.Fields{
-			"username":    params.Body.Username,
-			"headers":     params.HTTPRequest.Header,
-			"method":      params.HTTPRequest.Method,
-			"host":        params.HTTPRequest.Host,
-			"requestPath": params.HTTPRequest.RequestURI,
-		}).Info("CreateUserHandlerFunc")
-		t := opentracing.GlobalTracer()
-		span := t.StartSpan("UserCreateUserHandler")
-		defer span.Finish()
-		tnxGetSpan := tracer.StartSpan(
-			"DatabaseGet",
-			opentracing.ChildOf(span.Context()),
-		)
-		defer tnxGetSpan.Finish()
-		getTxn := db.Txn(false)
-		defer getTxn.Abort()
-		raw, err := getTxn.First("user", "username", params.Body.Username)
-		if err != nil || raw != nil {
-			cLoggerEntry.WithFields(log.Fields{
-				"username":    params.Body.Username,
-				"headers":     params.HTTPRequest.Header,
-				"method":      params.HTTPRequest.Method,
-				"host":        params.HTTPRequest.Host,
-				"requestPath": params.HTTPRequest.RequestURI,
-			}).Warn(err)
-			return user.NewCreateUserConflict()
-		}
-		tnxCreateSpan := tracer.StartSpan(
-			"DatabaseCreate",
-			opentracing.ChildOf(tnxGetSpan.Context()),
-		)
-		defer tnxCreateSpan.Finish()
-		txn := db.Txn(true)
-		defer txn.Abort()
-		if err := txn.Insert("user", params.Body); err != nil {
-			cLoggerEntry.WithFields(log.Fields{
-				"username":    params.Body.Username,
-				"headers":     params.HTTPRequest.Header,
-				"method":      params.HTTPRequest.Method,
-				"host":        params.HTTPRequest.Host,
-				"requestPath": params.HTTPRequest.RequestURI,
-			}).Warn(err)
-		}
-		txn.Commit()
-		return user.NewCreateUserDefault(201)
+	api.UserGetCartHandler = user.GetCartHandlerFunc(func(params user.GetCartParams, i interface{}) middleware.Responder {
+
+
+		return user.NewGetCartOK()
 	})
 
-	api.UserDeleteUserHandler = user.DeleteUserHandlerFunc(func(params user.DeleteUserParams) middleware.Responder {
-		cLoggerEntry.WithFields(log.Fields{
-			"username":    params.Username,
-			"headers":     params.HTTPRequest.Header,
-			"method":      params.HTTPRequest.Method,
-			"host":        params.HTTPRequest.Host,
-			"requestPath": params.HTTPRequest.RequestURI,
-		}).Infof("UserDeleteUserHandler")
-		t := opentracing.GlobalTracer()
-		span := t.StartSpan("UserDeleteUserHandler")
-		defer span.Finish()
-		tnxGetSpan := tracer.StartSpan(
-			"DatabaseGet",
-			opentracing.ChildOf(span.Context()),
-		)
-		defer tnxGetSpan.Finish()
-		getTxn := db.Txn(false)
-		defer getTxn.Abort()
-		raw, err := getTxn.First("user", "username", params.Username)
-		if err != nil || raw == nil {
-			cLoggerEntry.WithFields(log.Fields{
-				"username":    params.Username,
-				"headers":     params.HTTPRequest.Header,
-				"method":      params.HTTPRequest.Method,
-				"host":        params.HTTPRequest.Host,
-				"requestPath": params.HTTPRequest.RequestURI,
-			}).Warn(err)
-			return user.NewDeleteUserNotFound()
-		}
-		tnxDelSpan := tracer.StartSpan(
-			"DatabaseDelete",
-			opentracing.ChildOf(tnxGetSpan.Context()),
-		)
-		defer tnxDelSpan.Finish()
-		writeTxn := db.Txn(true)
-		defer writeTxn.Abort()
-		if err := writeTxn.Delete("user", raw); err != nil {
-			cLoggerEntry.WithFields(log.Fields{
-				"username":    params.Username,
-				"headers":     params.HTTPRequest.Header,
-				"method":      params.HTTPRequest.Method,
-				"host":        params.HTTPRequest.Host,
-				"requestPath": params.HTTPRequest.RequestURI,
-			}).Warn(err)
-			return user.NewDeleteUserNotFound()
-		}
-		writeTxn.Commit()
 
-		return user.NewDeleteUserOK()
-	})
-
-	api.UserGetUserByNameHandler = user.GetUserByNameHandlerFunc(func(params user.GetUserByNameParams) middleware.Responder {
-		cLoggerEntry.WithFields(log.Fields{
-			"username":    params.Username,
-			"headers":     params.HTTPRequest.Header,
-			"method":      params.HTTPRequest.Method,
-			"host":        params.HTTPRequest.Host,
-			"requestPath": params.HTTPRequest.RequestURI,
-		}).Infof("UserGetUserByNameHandler")
-		t := opentracing.GlobalTracer()
-		span := t.StartSpan("UserGetUserByNameHandler")
-		defer span.Finish()
-		tnxSpan := tracer.StartSpan(
-			"DatabaseGet",
-			opentracing.ChildOf(span.Context()),
-		)
-		defer tnxSpan.Finish()
-		txn := db.Txn(false)
-		defer txn.Abort()
-		raw, err := txn.First("user", "username", params.Username)
-		if err != nil {
-			cLoggerEntry.WithFields(log.Fields{
-				"username":    params.Username,
-				"headers":     params.HTTPRequest.Header,
-				"method":      params.HTTPRequest.Method,
-				"host":        params.HTTPRequest.Host,
-				"requestPath": params.HTTPRequest.RequestURI,
-			}).Warn(err)
-		}
-		if raw == nil {
-			return user.NewGetUserByNameNotFound()
-		}
-		u := raw.(*models.User)
-		return user.NewGetUserByNameOK().WithPayload(u)
-	})
 	// -----------------------------------------------------------------------------------------------------------------
 	server.ConfigureAPI()
 	server.Port = 8080
@@ -235,5 +130,4 @@ func main() {
 		cLoggerEntry.Fatalln(err)
 	}
 	// -----------------------------------------------------------------------------------------------------------------
-
 }

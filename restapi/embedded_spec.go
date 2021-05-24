@@ -18,6 +18,12 @@ var (
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "schemes": [
     "http"
   ],
@@ -29,301 +35,149 @@ func init() {
   },
   "basePath": "/v2",
   "paths": {
-    "/healthz": {
-      "get": {
-        "tags": [
-          "health"
-        ],
-        "summary": "Health check",
-        "responses": {
-          "default": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/user": {
+    "/login": {
       "post": {
-        "description": "This can only be done by the logged in user.",
-        "produces": [
-          "application/xml",
+        "description": "Returns token for authorized User",
+        "consumes": [
           "application/json"
         ],
         "tags": [
           "user"
         ],
-        "summary": "Create user",
-        "operationId": "createUser",
+        "operationId": "Login",
         "parameters": [
           {
-            "description": "Created user object",
-            "name": "body",
+            "description": "Login Payload",
+            "name": "login",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/LoginInfo"
             }
           }
         ],
         "responses": {
-          "400": {
-            "description": "Error creating user"
-          },
-          "409": {
-            "description": "User exists"
-          },
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-    "/user/login": {
-      "get": {
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Logs user into the system",
-        "operationId": "loginUser",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "The user name for login",
-            "name": "username",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "The password for login in clear text",
-            "name": "password",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful login",
+            "schema": {
+              "$ref": "#/definitions/LoginSuccess"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "User not found",
             "schema": {
               "type": "string"
-            },
-            "headers": {
-              "X-Expires-After": {
-                "type": "string",
-                "format": "date-time",
-                "description": "date in UTC when token expires"
-              },
-              "X-Rate-Limit": {
-                "type": "integer",
-                "format": "int32",
-                "description": "calls per hour allowed by the user"
-              }
             }
-          },
-          "400": {
-            "description": "Invalid username/password supplied"
           },
           "500": {
-            "description": "Error creating user"
+            "description": "Server error",
+            "schema": {
+              "type": "string"
+            }
           }
         }
       }
     },
-    "/user/logout": {
+    "/user/cart": {
       "get": {
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Logs out current logged in user session",
-        "operationId": "logoutUser",
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-    "/user/{username}": {
-      "get": {
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Get user by user name",
-        "operationId": "getUserByName",
-        "parameters": [
+        "security": [
           {
-            "type": "string",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
-            "name": "username",
-            "in": "path",
-            "required": true
+            "Bearer": []
           }
         ],
+        "description": "Get All cart items",
+        "tags": [
+          "user"
+        ],
+        "operationId": "GetCart",
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "All items in cart",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/CartPreview"
             }
           },
           "400": {
-            "description": "Invalid username supplied"
+            "description": "Bad Request"
           },
           "404": {
-            "description": "User not found"
-          }
-        }
-      },
-      "put": {
-        "description": "This can only be done by the logged in user.",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Updated user",
-        "operationId": "updateUser",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "name that need to be updated",
-            "name": "username",
-            "in": "path",
-            "required": true
+            "description": "Item Not Found"
           },
-          {
-            "description": "Updated user object",
-            "name": "body",
-            "in": "body",
-            "required": true,
+          "500": {
+            "description": "Server error",
             "schema": {
-              "$ref": "#/definitions/User"
+              "type": "string"
             }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Invalid user supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        }
-      },
-      "delete": {
-        "description": "This can only be done by the logged in user.",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Delete user",
-        "operationId": "deleteUser",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "The name that needs to be deleted",
-            "name": "username",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User deleted"
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
           }
         }
       }
     }
   },
   "definitions": {
-    "ApiResponse": {
+    "CartItem": {
       "type": "object",
       "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
+        "currency": {
           "type": "string"
         },
-        "type": {
+        "imageUrl": {
           "type": "string"
+        },
+        "productId": {
+          "type": "integer"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        },
+        "unitPrice": {
+          "type": "number"
         }
       }
     },
-    "User": {
+    "CartPreview": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/CartItem"
+      }
+    },
+    "LoginInfo": {
       "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
       "properties": {
         "email": {
           "type": "string"
         },
-        "firstName": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "lastName": {
-          "type": "string"
-        },
         "password": {
           "type": "string"
+        }
+      }
+    },
+    "LoginSuccess": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
         },
-        "phone": {
-          "type": "string"
-        },
-        "userStatus": {
-          "description": "User Status",
-          "type": "integer",
-          "format": "int32"
-        },
-        "username": {
+        "token": {
           "type": "string"
         }
-      },
-      "xml": {
-        "name": "User"
       }
     }
   },
   "securityDefinitions": {
-    "api_key": {
+    "Bearer": {
       "type": "apiKey",
-      "name": "api_key",
+      "name": "Authorization",
       "in": "header"
-    },
-    "user_auth": {
-      "type": "oauth2",
-      "flow": "implicit",
-      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-      "scopes": {
-        "read:pets": "read your pets",
-        "write:pets": "modify pets in your account"
-      }
     }
   },
   "tags": [
@@ -335,13 +189,15 @@ func init() {
         "url": "http://swagger.io"
       }
     }
-  ],
-  "externalDocs": {
-    "description": "Find out more about Swagger",
-    "url": "http://swagger.io"
-  }
+  ]
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "schemes": [
     "http"
   ],
@@ -353,301 +209,149 @@ func init() {
   },
   "basePath": "/v2",
   "paths": {
-    "/healthz": {
-      "get": {
-        "tags": [
-          "health"
-        ],
-        "summary": "Health check",
-        "responses": {
-          "default": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/user": {
+    "/login": {
       "post": {
-        "description": "This can only be done by the logged in user.",
-        "produces": [
-          "application/json",
-          "application/xml"
+        "description": "Returns token for authorized User",
+        "consumes": [
+          "application/json"
         ],
         "tags": [
           "user"
         ],
-        "summary": "Create user",
-        "operationId": "createUser",
+        "operationId": "Login",
         "parameters": [
           {
-            "description": "Created user object",
-            "name": "body",
+            "description": "Login Payload",
+            "name": "login",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/LoginInfo"
             }
           }
         ],
         "responses": {
-          "400": {
-            "description": "Error creating user"
-          },
-          "409": {
-            "description": "User exists"
-          },
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-    "/user/login": {
-      "get": {
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Logs user into the system",
-        "operationId": "loginUser",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "The user name for login",
-            "name": "username",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "The password for login in clear text",
-            "name": "password",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful login",
+            "schema": {
+              "$ref": "#/definitions/LoginSuccess"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "User not found",
             "schema": {
               "type": "string"
-            },
-            "headers": {
-              "X-Expires-After": {
-                "type": "string",
-                "format": "date-time",
-                "description": "date in UTC when token expires"
-              },
-              "X-Rate-Limit": {
-                "type": "integer",
-                "format": "int32",
-                "description": "calls per hour allowed by the user"
-              }
             }
-          },
-          "400": {
-            "description": "Invalid username/password supplied"
           },
           "500": {
-            "description": "Error creating user"
+            "description": "Server error",
+            "schema": {
+              "type": "string"
+            }
           }
         }
       }
     },
-    "/user/logout": {
+    "/user/cart": {
       "get": {
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Logs out current logged in user session",
-        "operationId": "logoutUser",
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-    "/user/{username}": {
-      "get": {
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Get user by user name",
-        "operationId": "getUserByName",
-        "parameters": [
+        "security": [
           {
-            "type": "string",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
-            "name": "username",
-            "in": "path",
-            "required": true
+            "Bearer": []
           }
         ],
+        "description": "Get All cart items",
+        "tags": [
+          "user"
+        ],
+        "operationId": "GetCart",
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "All items in cart",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/CartPreview"
             }
           },
           "400": {
-            "description": "Invalid username supplied"
+            "description": "Bad Request"
           },
           "404": {
-            "description": "User not found"
-          }
-        }
-      },
-      "put": {
-        "description": "This can only be done by the logged in user.",
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Updated user",
-        "operationId": "updateUser",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "name that need to be updated",
-            "name": "username",
-            "in": "path",
-            "required": true
+            "description": "Item Not Found"
           },
-          {
-            "description": "Updated user object",
-            "name": "body",
-            "in": "body",
-            "required": true,
+          "500": {
+            "description": "Server error",
             "schema": {
-              "$ref": "#/definitions/User"
+              "type": "string"
             }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Invalid user supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        }
-      },
-      "delete": {
-        "description": "This can only be done by the logged in user.",
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Delete user",
-        "operationId": "deleteUser",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "The name that needs to be deleted",
-            "name": "username",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User deleted"
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
           }
         }
       }
     }
   },
   "definitions": {
-    "ApiResponse": {
+    "CartItem": {
       "type": "object",
       "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
+        "currency": {
           "type": "string"
         },
-        "type": {
+        "imageUrl": {
           "type": "string"
+        },
+        "productId": {
+          "type": "integer"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        },
+        "unitPrice": {
+          "type": "number"
         }
       }
     },
-    "User": {
+    "CartPreview": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/CartItem"
+      }
+    },
+    "LoginInfo": {
       "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
       "properties": {
         "email": {
           "type": "string"
         },
-        "firstName": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "lastName": {
-          "type": "string"
-        },
         "password": {
           "type": "string"
+        }
+      }
+    },
+    "LoginSuccess": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
         },
-        "phone": {
-          "type": "string"
-        },
-        "userStatus": {
-          "description": "User Status",
-          "type": "integer",
-          "format": "int32"
-        },
-        "username": {
+        "token": {
           "type": "string"
         }
-      },
-      "xml": {
-        "name": "User"
       }
     }
   },
   "securityDefinitions": {
-    "api_key": {
+    "Bearer": {
       "type": "apiKey",
-      "name": "api_key",
+      "name": "Authorization",
       "in": "header"
-    },
-    "user_auth": {
-      "type": "oauth2",
-      "flow": "implicit",
-      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-      "scopes": {
-        "read:pets": "read your pets",
-        "write:pets": "modify pets in your account"
-      }
     }
   },
   "tags": [
@@ -659,10 +363,6 @@ func init() {
         "url": "http://swagger.io"
       }
     }
-  ],
-  "externalDocs": {
-    "description": "Find out more about Swagger",
-    "url": "http://swagger.io"
-  }
+  ]
 }`))
 }
